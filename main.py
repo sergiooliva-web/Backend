@@ -4,7 +4,9 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine
 from pydantic import BaseModel
-from fastapi.templating import Jinja2Templates
+from fastapi.templating import Jinja2Templates # Импортируем Jinja2Templates для работы с шаблонами
+from fastapi.responses import FileResponse # Импортируем FileResponse для работы с файлами
+
 
 from models import Base
 from crud import (
@@ -43,6 +45,10 @@ def get_db(): # Создаем зависимость для работы с б�
 app = FastAPI() # Создаем экземпляр FastAPI
 
 templates = Jinja2Templates(directory="templates")  # Указываем директорию для шаблонов
+
+@app.get("/") # Главная страница приложения
+def read_root():
+    return FileResponse("static/index.html") # Возвращаем HTML файл
 
 # Маршруты для таблицы customers
 @app.get("/customers", response_model=list[CustomerCreate])

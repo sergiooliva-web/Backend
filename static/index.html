@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customers Table</title>
+    <style>
+        body {  /* Основные стили для страницы */
+            font-family: Arial, sans-serif; /* Шрифт для текста */
+            margin: 20px; /* Отступы вокруг страницы */
+        }
+        table { /* Стили для таблицы */
+            width: 100%; /* Ширина таблицы 100% от родителя */
+            border-collapse: collapse; /* Убираем двойные границы */
+        }
+        th, td {
+            border: 1px solid #ddd; /* Граница ячеек */
+            padding: 8px; /* Отступы внутри ячеек */
+            text-align: left; /* Выравнивание текста в ячейках */
+        }
+        th {
+            background-color: #f4f4f4; /* Цвет фона заголовков */
+        }
+    </style>
+</head>
+<body>
+    <h1>Customers List</h1> <!-- Заголовок страницы -->
+    <table id="customersTable"> <!-- Таблица для отображения данных -->
+        <thead>
+            <tr>
+                <th>ID</th> <!-- Заголовок столбца ID -->
+                <th>First Name</th> <!-- Заголовок столбца First Name -->
+                <th>Last Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Данные будут загружены сюда -->
+        </tbody>
+    </table>
+
+    <script>
+        // Этот JavaScript-код отвечает за загрузку данных из вашего FastAPI-сервера (по адресу http://127.0.0.1:8000/customers) и их отображение в виде таблицы на HTML-странице.
+        async function loadCustomers() { // Загружаем данные с сервера, обработаем их, отображает в таблице (асинхронная функция)
+            try {
+                const response = await fetch('http://127.0.0.1:8000/customers'); // fetch() - отправляем GET-запрос на сервер FastAPI по указанному URL-адресу в формате JSON.
+                if (!response.ok) { // Проверяем, успешен ли ответ от сервера (статус 200-299)
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const customers = await response.json(); // Преобразуем ответ в JSON-формат (массив объектов клиентов), результат будет храниться в переменной customers.
+
+                // Получаем элемент tbody таблицы
+                const tbody = document.querySelector('#customersTable tbody'); // Находим элемент tbody.
+
+                // Очищаем таблицу
+                tbody.innerHTML = ''; // Свойство, которое позволяет получить или изменить содержимое HTML-элемента в виде строки. В данном случае очищаем содержимое tbody.
+
+                // Заполняем таблицу данными
+                customers.forEach(customer => {  // Перебирает массив клиентов
+                    const row = document.createElement('tr'); // tr Создается новая строка таблицы
+                    row.innerHTML = `
+                        <td>${customer.Id}</td> <!-- Внутрь строки добавляются ячейки (<td>), содержащие данные клиента (Id и FirstName)-->
+                        <td>${customer.FirstName}</td>
+                        <td>${customer.lastName}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading customers:', error); // обработка ошибок, если что-то пойдет не так (например, сервер недоступен или произошла ошибка сети).
+            }
+        }
+
+        // Загружаем данные при загрузке страницы
+        window.onload = loadCustomers;
+    </script>
+</body>
+</html>
