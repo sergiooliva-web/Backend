@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <Name>My Table</Name>
+    <!-- Основные стили для страницы -->
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; } <!--Свойство border-collapse: collapse; убирает двойные границы между ячейками таблицы. -->
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } <!--Свойство text-align: left; выравнивает текст в ячейках таблицы по левому краю. -->
+        th { background-color: #f4f4f4; } <!--Свойство background-color: #f4f4f4; задает цвет фона для заголовков таблицы. -->
+        input[type="text"], input[type="date"] { width: 100%; box-sizing: border-box; } <!--Свойство box-sizing: border-box; позволяет учитывать отступы и границы в общей ширине элемента. -->
+    </style>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr><!-- Заголовоки столбцов -->
+                <th>Name</th> 
+                <th>Type</th> 
+                <th>Age</th> 
+            </tr>
+        </thead>
+        <tbody>
+            <tr> <!-- Строки для ввода данных -->
+                <td><input type="text" id="Name"></td>
+                <td><input type="text" id="Type"></td>
+                <td><input type="number" id="Age"></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+    <!--Кнопки -->
+    <button id="addRow">✅Добавить</button>
+    <button id="removeRow">❌ Удалить</button>
+    <button id="loadData">📂 Загрузить</button>
+    <button id="saveData">📝 Сохранить</button>
+    <script>
+        const addRowButton = document.getElementById("addRow"); // addRowButton: Ссылка на кнопку с id="addRow", которая используется для добавления новой строки в таблицу
+        const removeRowButton = document.getElementById("removeRow"); // removeRowButton: Ссылка на кнопку с id="removeRow", которая используется для удаления последней строки из таблицы
+
+        // Вызывается функция getInputValues, которая возвращает объект с данными
+        function getInputValues() {
+            const Name = document.getElementById("Name").value.trim(); // получаем значение из поля ввода "Имя"
+            const Type = document.getElementById("Type").value.trim(); // получаем значение из поля ввода "Тип"
+            const Age = document.getElementById("Age").value; // получаем значение из поля ввода "Возраст"
+            return { Name, Type, Age}; // возвращаем объект с полученными значениями
+        }
+
+        // Добавление новой строки
+        addRowButton.addEventListener("click", function() {
+            const { Name, Type, Age} = getInputValues(); //  с помощью деструктуризации получаем значения из объекта, возвращаемого функцией getInputValues
+
+            const table = document.querySelector("table tbody"); // находим тело таблицы
+            const newRow = document.createElement("tr"); // создаем новую строку таблицы
+
+            newRow.innerHTML = `
+                <td>${Name}</td>
+                <td>${Type}</td>
+                <td>${Age}</td>
+                <td><button class="editButton">✏️</button></td>
+            `;
+
+            table.appendChild(newRow); // добавляем новую строку в тело таблицы
+
+            // Очищаем поля ввода после добавления строки для удобства пользователя
+            document.getElementById("Name").value = ""; // очищаем поле ввода "Имя"
+            document.getElementById("Type").value = "";    // очищаем поле ввода "Тип"
+            document.getElementById("Age").value = "";   // очищаем поле ввода "Возраст"
+        });
+
+        // Функция для удаления последней строки таблицы 
+        removeRowButton.addEventListener("click", function() { // добавляем обработчик события на кнопку удаления строки слушателем click 
+            const table = document.querySelector("table tbody");
+            const rows = table.querySelectorAll("tr");
+
+            if (rows.length > 1) { // проверяем, что в таблице есть хоть одна строка, кроме заголовка
+                table.removeChild(rows[rows.length - 1]);
+            }
+        });
+
+        // Обработка событий для кнопок "Edit" и "Save"
+        document.querySelector("table").addEventListener("click", function(event) {
+            if (event.target.classList.contains("editButton")) { // если клик был по кнопке "Edit"
+                const row = event.target.closest("tr"); // находим ближайшую строку к кнопке "Edit"
+                editRow(row); // переводим строку в режим редактирования
+            } else if (event.target.classList.contains("saveButton")) { // иначе проверяем, что клик был по кнопке "Save"
+                const row = event.target.closest("tr"); // находим ближайшую строку к кнопке "Save"
+                saveRow(row); // сохраняем изменения в строке 
+            }
+        });
+
+        // Функция для перевода строки в режим редактирования
+        function editRow(row) { // переводим строку в режим редактирования
+            const cells = row.querySelectorAll("td:not(:last-child)"); // находим все ячейки строки, кроме последней (где находится кнопка "Edit")
+            cells.forEach(cell => { // С помощью метода forEach перебираем все ячейки в строке 
+                const value = cell.textContent;
+                cell.innerHTML = `<input type="text" value="${value}">`; // заменяем текстовое содержимое ячейки на поле ввода с текущим значением
+            });
+
+            const actionCell = row.querySelector("td:last-child");
+            actionCell.innerHTML = '<button class="saveButton">📝</button>';
+        }
+
+        // Функция для сохранения изменений строки
+        function saveRow(row) {
+            const cells = row.querySelectorAll("td:not(:last-child)");
+            cells.forEach(cell => {
+                const input = cell.querySelector("input"); // находим поле ввода в ячейке
+                cell.textContent = input.value; // заменяем поле ввода на текстовое содержимое ячейки с новым значением
+            });
+
+            const actionCell = row.querySelector("td:last-child");
+            actionCell.innerHTML = '<button class="editButton">✏️</button>'; // заменяем кнопку "Save" на кнопку "Edit"
+        }
+
+        // Выгрузка данных в JSON
+        document.getElementById("saveData").addEventListener("click", function() {
+            const table = document.querySelector("table tbody"); // находим тело таблицы
+            const rows = table.querySelectorAll("tr"); // находим все строки в теле таблицы (включая строку ввода данных)
+
+            const data = []; // создаем пустой массив для хранения данных
+            rows.forEach(row => {
+                const cells = row.querySelectorAll("td:not(:last-child)");
+                if (cells.length > 0) {
+                    const Type = cells[1].textContent;
+                    const Age = cells[2].textContent;
+
+
+                    data.push({ Name, Type, Age}); // добавляем объект с данными в массив если в строке есть ячейки (данные)
+                }
+            });
+
+            const jsonData = JSON.stringify(data, null, 2); // с помощью метода JSON.stringify преобразуем массив объектов в строку JSON-формата (с отступами для удобства чтения)
+            const blob = new Blob([jsonData], { type: "application/json" });
+            const url = URL.createObjectURL(blob); // создаем URL-адрес для объекта Blob (бинарного большого объекта), который содержит данные в формате JSON
+
+            const a = document.createElement("a"); // создаем элемент <a> для скачивания файла
+            a.href = url; // устанавливаем атрибут href на созданный URL-адрес
+            a.download = "table_data.json"; // устанавливаем атрибут download на имя файла, который будет скачан
+            a.click(); // инициируем клик по элементу <a>, чтобы скачать файл
+
+            URL.revokeObjectURL(url);
+        });
+
+        // Загрузка данных из JSON
+        document.getElementById("loadData").addEventListener("click", function() {
+            const input = document.createElement("input"); // создаем элемент <input> для выбора файла
+            input.type = "file"; // устанавливаем тип input на "file"
+            input.accept = ".json"; // устанавливаем атрибут accept на ".json", чтобы разрешить выбор только файлов JSON
+
+            input.onchange = function(event) { // добавляем обработчик события onchange для элемента <input>
+                const file = event.target.files[0]; // получаем первый выбранный файл
+                if (!file) return; // если файл не выбран, выходим из функции
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {// проверяем, что файл корректный JSON
+                        const jsonData = JSON.parse(e.target.result);
+                        loadTableData(jsonData);
+                    } catch (error) { // если произошла ошибка при парсинге JSON, выводим сообщение об ошибке
+                        alert("Ошибка при загрузке файла: " + error.message);
+                    }
+                };
+
+                reader.readAsText(file); // читаем содержимое файла как текст
+            };
+
+            input.click();
+        });
+
+        function loadTableData(data) { // функция для загрузки данных в таблицу
+            const table = document.querySelector("table tbody");
+            table.innerHTML = "";
+
+            data.forEach(item => { // перебираем массив объектов и добавляем каждую строку в таблицу
+                const newRow = document.createElement("tr");
+                newRow.innerHTML = `
+                    <td>${item.Name}</td>
+                    <td>${item.Type}</td>
+                    <td>${item.Age}</td>
+                    <td><button class="editButton">✏️</button></td>
+                `;
+                table.appendChild(newRow); // добавляем новую строку в тело таблицы
+            });
+        }
+    </script>
+</body>
+</html>

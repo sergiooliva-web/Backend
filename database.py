@@ -13,3 +13,10 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Базовый класс для моделей
 Base = declarative_base()
+
+try:
+    connection = engine.connect()
+    print("Connection successful!")
+    connection.close()
+except Exception as e:
+    print("Connection failed:", e)

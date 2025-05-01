@@ -9,7 +9,7 @@ class Customer(Base):
     __tablename__ = "customers"
 
     Id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    FirstName = Column(String(30), nullable=False)
+    FirstName = Column(String(30), nullable=False) # Бывшее название FirstName
     LastName = Column(String(25), nullable=False)  # Новое поле
 
     # Связь с таблицей orders (один-ко-многим)

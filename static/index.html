@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customers Table</title>
+    <title>Customers and Products</title>
     <style>
         body {  /* Основные стили для страницы */
             font-family: Arial, sans-serif; /* Шрифт для текста */
@@ -12,6 +12,7 @@
         table { /* Стили для таблицы */
             width: 100%; /* Ширина таблицы 100% от родителя */
             border-collapse: collapse; /* Убираем двойные границы */
+            margin-bottom: 20px; /* Отступ снизу */
         }
         th, td {
             border: 1px solid #ddd; /* Граница ячеек */
@@ -24,13 +25,29 @@
     </style>
 </head>
 <body>
-    <h1>Customers List</h1> <!-- Заголовок страницы -->
-    <table id="customersTable"> <!-- Таблица для отображения данных -->
+   <h1>Customers List</h1> <!-- Заголовок страницы -->
+     <table id="customersTable"> <!-- Таблица для отображения данных -->
         <thead>
             <tr>
                 <th>ID</th> <!-- Заголовок столбца ID -->
                 <th>First Name</th> <!-- Заголовок столбца First Name -->
                 <th>Last Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Данные будут загружены сюда -->
+        </tbody>
+    </table>
+    
+    <h1>Products List</h1> <!-- Заголовок страницы -->
+    <table id="productsTable"> <!-- Таблица для отображения данных -->
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Product Name</th>
+                <th>Manufacturer</th>
+                <th>Product Count</th>
+                <th>Price</th>
             </tr>
         </thead>
         <tbody>
@@ -69,8 +86,41 @@
             }
         }
 
+        async function loadProducts() { // Загружаем данные с сервера, обработаем их, отображает в таблице (асинхронная функция)
+            try {
+                const response = await fetch('http://127.0.0.1:8000/products'); // fetch() - отправляем GET-запрос на сервер FastAPI по указанному URL-адресу в формате JSON.
+                if (!response.ok) { // Проверяем, успешен ли ответ от сервера (статус 200-299)
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const products = await response.json(); // Преобразуем ответ в JSON-формат (массив объектов клиентов), результат будет храниться в переменной customers.
+
+                // Получаем элемент tbody таблицы
+                const tbody = document.querySelector('#productsTable tbody'); // Находим элемент tbody.
+
+                // Очищаем таблицу
+                tbody.innerHTML = ''; // Свойство, которое позволяет получить или изменить содержимое HTML-элемента в виде строки. В данном случае очищаем содержимое tbody.
+
+                // Заполняем таблицу данными
+                products.forEach(products => {  // Перебирает массив клиентов
+                    const row = document.createElement('tr'); // tr Создается новая строка таблицы
+                    row.innerHTML = `
+                        <td>${products.Id}</td> <!-- Внутрь строки добавляются ячейки (<td>), содержащие данные клиента (Id и FirstName)-->
+                        <td>${products.ProductName}</td>
+                        <td>${products.Manufacturer}</td>
+                        <td>${products.ProductCount}</td>
+                        <td>${products.Price}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading products:', error); // обработка ошибок, если что-то пойдет не так (например, сервер недоступен или произошла ошибка сети).
+            }
+        }
+
         // Загружаем данные при загрузке страницы
-        window.onload = loadCustomers;
+        window.onload = () => {
+         loadCustomers();
+         loadProducts(); }
     </script>
 </body>
 </html>
